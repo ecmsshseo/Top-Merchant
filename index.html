@@ -113,7 +113,7 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
       <button class="btn btn-primary" id="btnRefresh" onclick="handleRefresh()">↻ 새로고침</button>
     </header>
     <div class="page-container">
-      <iframe id="pageFrame" class="page-frame" src="/overview"></iframe>
+      <iframe id="pageFrame" class="page-frame" src="overview.html"></iframe>
     </div>
   </div>
 </div>
@@ -121,7 +121,7 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b===btn));
-    document.getElementById('pageFrame').src = '/' + btn.dataset.page;
+    document.getElementById('pageFrame').src = btn.dataset.page + '.html';
     document.getElementById('topbarTitle').innerHTML =
       `${btn.dataset.title} <span id="topbarSub">${btn.dataset.sub}</span>`;
   });
