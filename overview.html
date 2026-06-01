@@ -109,6 +109,14 @@ Chart.defaults.font.size = 11;
 Chart.defaults.color = '#94A3B8';
 Chart.register(ChartDataLabels);
 
+// GitHub Pages에서 로컬 Python 서버 API를 호출하기 위한 설정
+// 아래 주소를 실제 내 PC IPv4 주소로 변경하세요. 예: http://192.168.0.123:5010
+const API_BASE = 'http://172.19.0.48:5010';
+function apiUrl(path) {
+  return API_BASE.replace(/\/$/, '') + path;
+}
+
+
 let chartKPI = null, _chartBar = null;
 let allSnapshots  = [];
 let currentPeriod = 'weekly';
@@ -211,8 +219,8 @@ function toggleNodeny() {
 function reloadSegments() {
   // scope 필터는 KPI 카드에만 적용 — 차트/테이블은 항상 전체(all) 기준 유지
   Promise.all([
-    fetch(`/api/segments?scope=${currentScope}&exclude_nodeny=false`).then(r=>r.json()),
-    fetch(`/api/segments?scope=${currentScope}&exclude_nodeny=true`).then(r=>r.json()),
+    fetch(apiUrl(`/api/segments?scope=${currentScope}&exclude_nodeny=false`)).then(r=>r.json()),
+    fetch(apiUrl(`/api/segments?scope=${currentScope}&exclude_nodeny=true`)).then(r=>r.json()),
   ]).then(([base, excl]) => {
     _segBase     = base.segments;
     _segExcluded = excl.segments;
@@ -531,8 +539,8 @@ function render(segBase, segExcluded, kpiTarget, isSample, snapshots){
 // ── 전체 데이터 재로드 (미동의 토글 시 차트/테이블용) ──
 function reloadAllData() {
   Promise.all([
-    fetch('/api/segments?scope=all&exclude_nodeny=false').then(r=>r.json()),
-    fetch('/api/segments?scope=all&exclude_nodeny=true').then(r=>r.json()),
+    fetch(apiUrl('/api/segments?scope=all&exclude_nodeny=false')).then(r=>r.json()),
+    fetch(apiUrl('/api/segments?scope=all&exclude_nodeny=true')).then(r=>r.json()),
   ]).then(([base, excl]) => {
     _segAllBase     = base.segments;
     _segAllExcluded = excl.segments;
@@ -545,9 +553,9 @@ function reloadAllData() {
 
 // ── 초기 로드 ──
 Promise.all([
-  fetch('/api/segments?scope=all&exclude_nodeny=false').then(r=>r.json()),
-  fetch('/api/segments?scope=all&exclude_nodeny=true').then(r=>r.json()),
-  fetch('/api/history').then(r=>r.json()),
+  fetch(apiUrl('/api/segments?scope=all&exclude_nodeny=false')).then(r=>r.json()),
+  fetch(apiUrl('/api/segments?scope=all&exclude_nodeny=true')).then(r=>r.json()),
+  fetch(apiUrl('/api/history')).then(r=>r.json()),
 ]).then(([base,excl,hist])=>{
   // all 기준 데이터 저장 (차트/테이블 전용)
   _segAllBase     = base.segments;
