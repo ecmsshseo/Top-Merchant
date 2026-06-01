@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>구글시트</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',sans-serif;background:#f0f4fa;color:#0f2747;font-size:14px;padding:24px;overflow-y:auto;}
+
+.section-title{font-size:15px;font-weight:800;color:#0f2747;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.section-title::before{content:'';width:5px;height:20px;background:#2563EB;border-radius:99px;flex-shrink:0;}
+
+.sheet-card{background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(15,39,71,.05);margin-bottom:16px;display:flex;flex-direction:column;gap:16px;}
+.sheet-info{display:flex;align-items:flex-start;gap:16px;}
+.sheet-icon{width:48px;height:48px;border-radius:12px;background:#DCFCE7;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.sheet-name{font-size:16px;font-weight:800;color:#0f2747;}
+.sheet-tab{font-size:12px;color:#64748B;margin-top:3px;}
+.sheet-url{font-size:11px;color:#94A3B8;margin-top:4px;font-family:monospace;word-break:break-all;}
+
+.notice{background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:12px 16px;font-size:12px;color:#92400E;font-weight:600;}
+
+.sheet-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;font-family:inherit;text-decoration:none;}
+.btn-primary{background:#2563EB;color:white;} .btn-primary:hover{background:#1d4ed8;}
+.btn-ghost{background:#F1F5F9;color:#64748B;} .btn-ghost:hover{background:#e2e8f0;}
+
+.links-card{background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(15,39,71,.05);}
+.links-title{font-size:13px;font-weight:700;color:#0f2747;margin-bottom:12px;}
+.link-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f7f9fd;border:1px solid #e4eaf5;border-radius:10px;font-size:12px;color:#475569;text-decoration:none;transition:all .12s;margin-bottom:8px;}
+.link-item:last-child{margin-bottom:0;}
+.link-item:hover{background:#EFF6FF;border-color:#BFDBFE;color:#2563EB;}
+.link-icon{font-size:16px;}
+.link-label{font-weight:600;}
+.link-desc{color:#94A3B8;margin-left:auto;font-size:11px;}
+</style>
+</head>
+<body>
+
+<div class="section-title">구글시트</div>
+
+<div class="sheet-card">
+  <div class="sheet-info">
+    <div class="sheet-icon">📊</div>
+    <div>
+      <div class="sheet-name">Top Merchant 리드 시트</div>
+      <div class="sheet-tab">탭: top merchant 리스트_확정의 사본</div>
+      <div class="sheet-url">https://docs.google.com/spreadsheets/d/1pVACkM4qW-GMrENJ-qxObdZTCprl-bOBseqrm0uIPEg/</div>
+    </div>
+  </div>
+  <div class="notice">⚠️ 회사 계정(in.cd24.kr)으로 로그인된 상태에서만 접근 가능합니다.</div>
+  <div class="sheet-actions">
+    <a class="btn btn-primary" href="https://docs.google.com/spreadsheets/d/1pVACkM4qW-GMrENJ-qxObdZTCprl-bOBseqrm0uIPEg/edit?usp=drivesdk" target="_blank">📊 시트 열기 →</a>
+    <a class="btn btn-ghost"   href="https://docs.google.com/spreadsheets/d/1pVACkM4qW-GMrENJ-qxObdZTCprl-bOBseqrm0uIPEg/export?format=csv" target="_blank">⬇️ CSV 다운로드</a>
+  </div>
+</div>
+
+<div class="links-card">
+  <div class="links-title">관련 링크</div>
+  <a class="link-item" href="https://docs.google.com/spreadsheets/d/1pVACkM4qW-GMrENJ-qxObdZTCprl-bOBseqrm0uIPEg/edit?gid=1365951571#gid=1365951571" target="_blank">
+    <span class="link-icon">📋</span>
+    <span class="link-label">리드 시트 탭 직접 이동</span>
+    <span class="link-desc">top merchant 리스트_확정의 사본</span>
+  </a>
+  <a class="link-item" href="https://docs.google.com/presentation/d/1eP-MKlXBWkfhFXHv2RfUsmKDy4cqbKQnf0xkvxFVUfQ/edit" target="_blank">
+    <span class="link-icon">📑</span>
+    <span class="link-label">셋업 가이드</span>
+    <span class="link-desc">YouTube Shopping 온보딩 안내</span>
+  </a>
+</div>
+
+</body>
+</html>

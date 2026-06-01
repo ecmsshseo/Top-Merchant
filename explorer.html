@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>리드 탐색기</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Pretendard',sans-serif;background:#f0f4fa;color:#0f2747;font-size:14px;padding:24px;overflow-y:auto;}
+
+.section-title{font-size:15px;font-weight:800;color:#0f2747;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.section-title::before{content:'';width:5px;height:20px;background:#2563EB;border-radius:99px;flex-shrink:0;}
+
+/* 필터 패널 */
+.filter-panel{background:#fff;border:1px solid #e4eaf5;border-radius:16px;padding:18px 20px;box-shadow:0 2px 8px rgba(15,39,71,.05);margin-bottom:16px;}
+.filter-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}
+
+/* 드롭다운 필터 아이템 */
+.filter-item{display:flex;flex-direction:column;gap:5px;min-width:140px;}
+.filter-label{font-size:11px;font-weight:700;color:#64748B;}
+.filter-dropdown{position:relative;}
+.dd-trigger{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1.5px solid #e4eaf5;border-radius:10px;background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:#0f2747;min-width:130px;font-family:inherit;gap:8px;white-space:nowrap;}
+.dd-trigger.has-value{border-color:#2563EB;background:#EFF6FF;color:#2563EB;}
+.dd-trigger .arrow{font-size:10px;color:#94A3B8;flex-shrink:0;}
+.dd-menu{position:absolute;top:calc(100%+4px);left:0;background:#fff;border:1px solid #e4eaf5;border-radius:10px;box-shadow:0 8px 24px rgba(15,39,71,.1);z-index:50;min-width:150px;overflow:hidden;display:none;}
+.dd-menu.show{display:block;}
+.dd-opt{display:flex;align-items:center;gap:8px;padding:9px 14px;cursor:pointer;font-size:12px;color:#0f2747;transition:background .1s;}
+.dd-opt:hover{background:#f7f9fd;}
+.dd-opt input[type=checkbox]{accent-color:#2563EB;width:14px;height:14px;flex-shrink:0;}
+.dd-opt.selected{background:#EFF6FF;color:#2563EB;font-weight:600;}
+
+/* AND/OR */
+.logic-wrap{display:flex;flex-direction:column;gap:5px;}
+.logic-label{font-size:11px;font-weight:700;color:#64748B;}
+.logic-toggle{display:flex;border:1.5px solid #e4eaf5;border-radius:10px;overflow:hidden;}
+.logic-btn{padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:#f7f9fd;color:#94A3B8;font-family:inherit;}
+.logic-btn.active{background:#2563EB;color:white;}
+
+/* 검색/초기화 버튼 */
+.filter-actions{display:flex;gap:6px;align-self:flex-end;padding-bottom:1px;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.btn-primary{background:#2563EB;color:white;}.btn-primary:hover{background:#1d4ed8;}
+.btn-ghost{background:#F1F5F9;color:#64748B;}.btn-ghost:hover{background:#e2e8f0;}
+
+/* 선택된 조건 태그 */
+.active-filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;min-height:0;}
+.filter-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:99px;font-size:11px;font-weight:700;color:#2563EB;}
+.filter-tag button{background:none;border:none;cursor:pointer;color:#93C5FD;font-size:13px;line-height:1;padding:0;}
+.filter-tag button:hover{color:#DC2626;}
+
+/* 결과 */
+.result-bar{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.result-count{font-size:13px;font-weight:700;}
+.result-count .num{color:#2563EB;font-size:18px;}
+.result-desc{font-size:11px;color:#94A3B8;margin-left:auto;}
+.result-wrap{background:#fff;border:1px solid #e4eaf5;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(15,39,71,.05);}
+.result-table{width:100%;border-collapse:collapse;font-size:13px;}
+.result-table thead tr{background:#EFF6FF;}
+.result-table th{padding:11px 14px;font-size:11px;font-weight:700;color:#1e3a8a;text-align:left;border-bottom:1px solid #dbe7f5;white-space:nowrap;}
+.result-table td{padding:11px 14px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+.result-table tr:last-child td{border-bottom:none;}
+.result-table tr:hover td{background:#f9fbff;}
+
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap;}
+.b-ACTIVE{background:#DCFCE7;color:#16A34A;}.b-ELIGIBLE{background:#EFF6FF;color:#2563EB;}
+.b-UNSPECIFIED{background:#FEF3C7;color:#D97706;}.b-PAUSED,.b-UNSTABLE{background:#FEE2E2;color:#DC2626;}
+.b-동의{background:#DCFCE7;color:#16A34A;}.b-미동의{background:#FEE2E2;color:#DC2626;}
+.b-empty{background:#F1F5F9;color:#64748B;}
+
+.empty-msg,.loading-msg{text-align:center;padding:50px;color:#94A3B8;font-size:13px;}
+.pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:14px;border-top:1px solid #f1f5f9;flex-wrap:wrap;}
+.page-btn{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #e4eaf5;background:#fff;color:#64748B;transition:all .12s;font-family:inherit;}
+.page-btn.active{background:#2563EB;color:white;border-color:#2563EB;}
+.page-btn:hover:not(.active){background:#EFF6FF;color:#2563EB;border-color:#2563EB;}
+.page-btn:disabled{opacity:.4;cursor:not-allowed;}
+.page-info{font-size:12px;color:#94A3B8;margin:0 6px;}
+</style>
+</head>
+<body>
+
+<div class="section-title">리드 탐색기</div>
+
+<div class="filter-panel">
+  <div class="filter-row" id="filterRow">
+
+    <!-- 에볼루션 -->
+    <div class="filter-item">
+      <div class="filter-label">에볼루션</div>
+      <div class="filter-dropdown" id="dd_integration">
+        <button class="dd-trigger" onclick="toggleDD('integration')">
+          <span id="dd_integration_label">전체</span><span class="arrow">▼</span>
+        </button>
+        <div class="dd-menu" id="dd_integration_menu"></div>
+      </div>
+    </div>
+
+    <!-- 제휴 -->
+    <div class="filter-item">
+      <div class="filter-label">제휴</div>
+      <div class="filter-dropdown" id="dd_affiliate">
+        <button class="dd-trigger" onclick="toggleDD('affiliate')">
+          <span id="dd_affiliate_label">전체</span><span class="arrow">▼</span>
+        </button>
+        <div class="dd-menu" id="dd_affiliate_menu"></div>
+      </div>
+    </div>
+
+    <!-- 약관동의 -->
+    <div class="filter-item">
+      <div class="filter-label">약관동의</div>
+      <div class="filter-dropdown" id="dd_consent">
+        <button class="dd-trigger" onclick="toggleDD('consent')">
+          <span id="dd_consent_label">전체</span><span class="arrow">▼</span>
+        </button>
+        <div class="dd-menu" id="dd_consent_menu"></div>
+      </div>
+    </div>
+
+    <!-- YT 버전 -->
+    <div class="filter-item">
+      <div class="filter-label">유튜브쇼핑 버전</div>
+      <div class="filter-dropdown" id="dd_service_origin">
+        <button class="dd-trigger" onclick="toggleDD('service_origin')">
+          <span id="dd_service_origin_label">전체</span><span class="arrow">▼</span>
+        </button>
+        <div class="dd-menu" id="dd_service_origin_menu"></div>
+      </div>
+    </div>
+
+    <!-- 등급 -->
+    <div class="filter-item">
+      <div class="filter-label">등급</div>
+      <div class="filter-dropdown" id="dd_grade">
+        <button class="dd-trigger" onclick="toggleDD('grade')">
+          <span id="dd_grade_label">전체</span><span class="arrow">▼</span>
+        </button>
+        <div class="dd-menu" id="dd_grade_menu"></div>
+      </div>
+    </div>
+
+    <!-- AND/OR -->
+    <div class="logic-wrap">
+      <div class="logic-label">조건 결합</div>
+      <div class="logic-toggle">
+        <button class="logic-btn active" id="btnAND" onclick="setLogic('AND')">AND</button>
+        <button class="logic-btn"        id="btnOR"  onclick="setLogic('OR')">OR</button>
+      </div>
+    </div>
+
+    <!-- 버튼 -->
+    <div class="filter-actions">
+      <button class="btn btn-primary" onclick="doSearch(1)">🔍 검색</button>
+      <button class="btn btn-ghost"   onclick="resetAll()">초기화</button>
+    </div>
+  </div>
+
+  <!-- 선택된 조건 태그 -->
+  <div class="active-filters" id="activeTags"></div>
+</div>
+
+<div id="resultSection" style="display:none">
+  <div class="result-bar">
+    <div class="result-count">검색 결과 <span class="num" id="resultCount">0</span>건</div>
+    <div class="result-desc" id="resultDesc"></div>
+  </div>
+  <div class="result-wrap">
+    <table class="result-table">
+      <thead>
+        <tr>
+          <th>NO</th><th>회사명</th><th>Mall ID</th>
+          <th>에볼루션</th><th>제휴</th><th>약관동의</th><th>등급</th>
+        </tr>
+      </thead>
+      <tbody id="resultBody"></tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<script>
+// ── 필드 정의 ──
+const FIELDS = {
+  integration:    { label:'에볼루션',         values:['ACTIVE','UNSTABLE'] },
+  affiliate:      { label:'제휴',             values:['ACTIVE','ELIGIBLE','UNSPECIFIED','PAUSED',''] },
+  consent:        { label:'약관동의',         values:['동의','미동의'] },
+  service_origin: { label:'유튜브쇼핑 버전',  values:['YTSHOPS','LEGACY_YTSHOPPING',''] },
+  grade:          { label:'등급',             values:['VIP','TOP100',''] },
+};
+const VAL_LABEL = { '':'(빈값)', YTSHOPS:'YTSHOPS (샵스)', LEGACY_YTSHOPPING:'LEGACY (구유튜브)' };
+
+let logic   = 'AND';
+let selected = { integration:[], affiliate:[], consent:[], service_origin:[], grade:[] };
+let currentPage = 1;
+const PAGE_SIZE  = 50;
+
+// ── 드롭다운 메뉴 초기화 ──
+function initMenus() {
+  Object.entries(FIELDS).forEach(([field, fd]) => {
+    const menu = document.getElementById(`dd_${field}_menu`);
+    menu.innerHTML = fd.values.map(v => {
+      const label = VAL_LABEL[v] ?? v;
+      return `<label class="dd-opt" id="opt_${field}_${v||'EMPTY'}">
+        <input type="checkbox" value="${v}" onchange="toggleVal('${field}','${v}')">
+        ${label}
+      </label>`;
+    }).join('');
+  });
+}
+
+function toggleDD(field) {
+  const menu = document.getElementById(`dd_${field}_menu`);
+  // 다른 메뉴 닫기
+  document.querySelectorAll('.dd-menu.show').forEach(m => {
+    if (m !== menu) m.classList.remove('show');
+  });
+  menu.classList.toggle('show');
+}
+
+function toggleVal(field, val) {
+  const arr = selected[field];
+  const idx = arr.indexOf(val);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(val);
+  updateTriggerLabel(field);
+  updateTags();
+}
+
+function updateTriggerLabel(field) {
+  const arr = selected[field];
+  const trigger = document.querySelector(`#dd_${field} .dd-trigger`);
+  const label   = document.getElementById(`dd_${field}_label`);
+  if (!arr.length) {
+    label.textContent = '전체';
+    trigger.classList.remove('has-value');
+  } else {
+    const names = arr.map(v => VAL_LABEL[v] ?? v);
+    label.textContent = names.length <= 2 ? names.join(', ') : `${names[0]} 외 ${names.length-1}`;
+    trigger.classList.add('has-value');
+  }
+}
+
+function updateTags() {
+  const container = document.getElementById('activeTags');
+  const tags = [];
+  Object.entries(selected).forEach(([field, vals]) => {
+    vals.forEach(v => {
+      const label = VAL_LABEL[v] ?? v;
+      tags.push(`<div class="filter-tag">
+        ${FIELDS[field].label}: ${label}
+        <button onclick="removeTag('${field}','${v}')">×</button>
+      </div>`);
+    });
+  });
+  container.innerHTML = tags.join('');
+}
+
+function removeTag(field, val) {
+  selected[field] = selected[field].filter(v => v !== val);
+  // 체크박스 해제
+  const cb = document.querySelector(`#opt_${field}_${val||'EMPTY'} input`);
+  if (cb) cb.checked = false;
+  updateTriggerLabel(field);
+  updateTags();
+}
+
+function setLogic(v) {
+  logic = v;
+  document.getElementById('btnAND').classList.toggle('active', v==='AND');
+  document.getElementById('btnOR').classList.toggle('active',  v==='OR');
+}
+
+function resetAll() {
+  Object.keys(selected).forEach(f => {
+    selected[f] = [];
+    document.querySelectorAll(`#dd_${f}_menu input`).forEach(cb => cb.checked = false);
+    updateTriggerLabel(f);
+  });
+  updateTags();
+  document.getElementById('resultSection').style.display = 'none';
+}
+
+// ── 검색 ──
+function doSearch(page) {
+  currentPage = page || 1;
+  const conditions = Object.entries(selected)
+    .filter(([,vals]) => vals.length > 0)
+    .map(([field, values]) => ({ field, values }));
+
+  document.getElementById('resultSection').style.display = 'block';
+  document.getElementById('resultBody').innerHTML = '<tr><td colspan="7" class="loading-msg">검색 중...</td></tr>';
+
+  const params = new URLSearchParams({
+    conditions: JSON.stringify(conditions),
+    logic, page: currentPage, page_size: PAGE_SIZE,
+  });
+
+  fetch(`/api/filter?${params}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('resultCount').textContent = data.total.toLocaleString();
+      const desc = conditions.length
+        ? conditions.map(c => `${FIELDS[c.field]?.label}: ${c.values.map(v=>VAL_LABEL[v]??v).join(' or ')}`).join(` [${logic}] `)
+        : '전체';
+      document.getElementById('resultDesc').textContent = desc;
+
+      if (!data.rows.length) {
+        document.getElementById('resultBody').innerHTML = '<tr><td colspan="7" class="empty-msg">조건에 맞는 리드가 없습니다</td></tr>';
+        document.getElementById('pagination').innerHTML = '';
+        return;
+      }
+      document.getElementById('resultBody').innerHTML = data.rows.map(r => `
+        <tr>
+          <td style="font-size:12px;color:#94A3B8">${r.no}</td>
+          <td style="font-weight:600">${r.company||'-'}</td>
+          <td style="font-size:12px;font-family:monospace;color:#64748B">${r.mall_id||'-'}</td>
+          <td><span class="badge b-${r.integration||'empty'}">${r.integration||'-'}</span></td>
+          <td><span class="badge b-${r.affiliate||'empty'}">${r.affiliate||'-'}</span></td>
+          <td><span class="badge b-${r.consent||'empty'}">${r.consent||'-'}</span></td>
+          <td style="font-size:12px;color:#64748B">${r.grade||'-'}</td>
+        </tr>`).join('');
+      renderPagination(data.total);
+    })
+    .catch(err => {
+      document.getElementById('resultBody').innerHTML = `<tr><td colspan="7" class="empty-msg" style="color:#DC2626">오류: ${err.message}</td></tr>`;
+    });
+}
+
+function renderPagination(total) {
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  if (totalPages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+  const pages = [];
+  for (let i=1; i<=totalPages; i++) {
+    if (i===1||i===totalPages||Math.abs(i-currentPage)<=2) pages.push(i);
+    else if (pages[pages.length-1]!=='...') pages.push('...');
+  }
+  document.getElementById('pagination').innerHTML = [
+    `<button class="page-btn" onclick="doSearch(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`,
+    ...pages.map(p => p==='...' ? `<span class="page-info">···</span>`
+      : `<button class="page-btn ${p===currentPage?'active':''}" onclick="doSearch(${p})">${p}</button>`),
+    `<button class="page-btn" onclick="doSearch(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`,
+    `<span class="page-info">${total.toLocaleString()}건 / ${totalPages}p</span>`,
+  ].join('');
+}
+
+// 외부 클릭 시 드롭다운 닫기
+document.addEventListener('click', e => {
+  if (!e.target.closest('.filter-dropdown')) {
+    document.querySelectorAll('.dd-menu.show').forEach(m => m.classList.remove('show'));
+  }
+});
+
+initMenus();
+</script>
+</body>
+</html>
